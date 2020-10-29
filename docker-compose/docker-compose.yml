@@ -1,0 +1,18 @@
+version: "3.8"
+
+volumes:
+  esdata01:
+    driver: local
+
+services:
+  cdap:
+    container_name: cdap-sandbox
+    image: caskdata/cdap-sandbox:latest
+    restart: unless-stopped
+    ports:
+      - "32769:11011"
+      - "32768:11015"
+    environment:
+      - cdap-sandbox=32769
+    volumes:
+      - esdata01:/chaves
