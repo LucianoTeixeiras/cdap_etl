@@ -1,0 +1,1 @@
+"/C/Program Files/MongoDB/Server/4.4/bin/mongoexport" -v --uri "mongodb://localhost:27017/twitter_botica?readPreference=primary" -c "tweets" --out /C/Users/luciano/Documents/GitHub/cdap_etl/sources/tweets.csv  --fields _id,user.name,user.screen_name,text --type csv

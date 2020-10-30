@@ -1,0 +1,153 @@
+{
+    "name": "03_carrega_dados_twitter",
+    "description": "Data Pipeline Application",
+    "artifact": {
+        "name": "cdap-data-pipeline",
+        "version": "6.2.3",
+        "scope": "SYSTEM"
+    },
+    "config": {
+        "resources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "driverResources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "connections": [
+            {
+                "from": "GCSFile",
+                "to": "Wrangler"
+            },
+            {
+                "from": "Wrangler",
+                "to": "BigQuery Twitter"
+            }
+        ],
+        "comments": [],
+        "postActions": [],
+        "properties": {},
+        "processTimingEnabled": true,
+        "stageLoggingEnabled": true,
+        "stages": [
+            {
+                "name": "GCSFile",
+                "plugin": {
+                    "name": "GCSFile",
+                    "type": "batchsource",
+                    "label": "GCSFile",
+                    "artifact": {
+                        "name": "google-cloud",
+                        "version": "0.15.3",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "project": "datafusion-284914",
+                        "format": "text",
+                        "skipHeader": "false",
+                        "serviceFilePath": "/chaves/datafusion-284914-3bf5712a0b57.json",
+                        "filenameOnly": "false",
+                        "recursive": "false",
+                        "encrypted": "false",
+                        "copyHeader": "true",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}",
+                        "path": "gs://etl_load/twitter/tweets.csv",
+                        "referenceName": "etl_load.tweets.csv"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "GCSFile",
+                "type": "batchsource",
+                "label": "GCSFile",
+                "icon": "fa-plug"
+            },
+            {
+                "name": "Wrangler",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "Wrangler",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.2.3",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "workspaceId": "d72a2008-d7c6-4b9f-a644-275afe94dfd4",
+                        "directives": "parse-as-csv :body ',' true\ndrop body\ncleanse-column-names\nltrim user_name\nrtrim user_name\nltrim user_screen_name\nrtrim user_screen_name\nfilter-rows-on condition-false _id =^ \"ObjectId\"",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"_id\",\"type\":[\"string\",\"null\"]},{\"name\":\"user_name\",\"type\":[\"string\",\"null\"]},{\"name\":\"user_screen_name\",\"type\":[\"string\",\"null\"]},{\"name\":\"text\",\"type\":[\"string\",\"null\"]}]}",
+                        "field": "*",
+                        "precondition": "false",
+                        "threshold": "1"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"_id\",\"type\":[\"string\",\"null\"]},{\"name\":\"user_name\",\"type\":[\"string\",\"null\"]},{\"name\":\"user_screen_name\",\"type\":[\"string\",\"null\"]},{\"name\":\"text\",\"type\":[\"string\",\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "GCSFile",
+                        "schema": "{\"type\":\"record\",\"name\":\"text\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ],
+                "id": "Wrangler",
+                "type": "transform",
+                "label": "Wrangler",
+                "icon": "icon-DataPreparation"
+            },
+            {
+                "name": "BigQuery Twitter",
+                "plugin": {
+                    "name": "BigQueryTable",
+                    "type": "batchsink",
+                    "label": "BigQuery Twitter",
+                    "artifact": {
+                        "name": "google-cloud",
+                        "version": "0.15.3",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "project": "datafusion-284914",
+                        "serviceFilePath": "/chaves/datafusion-284914-3bf5712a0b57.json",
+                        "operation": "insert",
+                        "truncateTable": "false",
+                        "allowSchemaRelaxation": "false",
+                        "location": "US",
+                        "createPartitionedTable": "false",
+                        "partitioningType": "TIME",
+                        "partitionFilterRequired": "false",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"_id\",\"type\":[\"string\",\"null\"]},{\"name\":\"user_name\",\"type\":[\"string\",\"null\"]},{\"name\":\"text\",\"type\":[\"string\",\"null\"]}]}",
+                        "referenceName": "Twitter",
+                        "dataset": "rz",
+                        "table": "twitter"
+                    }
+                },
+                "outputSchema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"_id\",\"type\":[\"string\",\"null\"]},{\"name\":\"user_name\",\"type\":[\"string\",\"null\"]},{\"name\":\"text\",\"type\":[\"string\",\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "Wrangler",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"_id\",\"type\":[\"string\",\"null\"]},{\"name\":\"user_name\",\"type\":[\"string\",\"null\"]},{\"name\":\"text\",\"type\":[\"string\",\"null\"]}]}"
+                    }
+                ],
+                "id": "BigQuery-Twitter",
+                "type": "batchsink",
+                "label": "BigQuery Twitter",
+                "icon": "fa-plug"
+            }
+        ],
+        "schedule": "0 * * * *",
+        "engine": "spark",
+        "numOfRecordsPreview": 100,
+        "description": "Data Pipeline Application",
+        "maxConcurrentRuns": 1
+    }
+}

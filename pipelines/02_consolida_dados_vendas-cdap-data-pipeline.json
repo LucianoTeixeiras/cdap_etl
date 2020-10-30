@@ -1,0 +1,344 @@
+{
+    "name": "02_consolida_dados_vendas",
+    "description": "Data Pipeline Application",
+    "artifact": {
+        "name": "cdap-data-pipeline",
+        "version": "6.2.3",
+        "scope": "SYSTEM"
+    },
+    "config": {
+        "resources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "driverResources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "connections": [
+            {
+                "from": "BigQueryTable",
+                "to": "Wrangler"
+            },
+            {
+                "from": "Wrangler",
+                "to": "Consolidado_Ano_Mes3"
+            },
+            {
+                "from": "Consolidado_Ano_Mes3",
+                "to": "CZ_Consolidado_Ano_Mes81"
+            },
+            {
+                "from": "Wrangler",
+                "to": "Agregando_Marca_Linha23"
+            },
+            {
+                "from": "Agregando_Marca_Linha23",
+                "to": "CZ_Consolidado_Marca_Linha91"
+            },
+            {
+                "from": "Wrangler",
+                "to": "Agregando_Marca_Ano_mes41"
+            },
+            {
+                "from": "Agregando_Marca_Ano_mes41",
+                "to": "CZ_Consolidado_Marca_Ano_Mes50"
+            },
+            {
+                "from": "Wrangler",
+                "to": "Agregando_Linha_Ano_Mes53"
+            },
+            {
+                "from": "Agregando_Linha_Ano_Mes53",
+                "to": "CZ_Consolidado_Linha_Ano_Mes47"
+            }
+        ],
+        "comments": [],
+        "postActions": [],
+        "properties": {},
+        "processTimingEnabled": true,
+        "stageLoggingEnabled": true,
+        "stages": [
+            {
+                "name": "BigQueryTable",
+                "plugin": {
+                    "name": "BigQueryTable",
+                    "type": "batchsource",
+                    "label": "BigQueryTable",
+                    "artifact": {
+                        "name": "google-cloud",
+                        "version": "0.15.3",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "schema": "{\"type\":\"record\",\"name\":\"bigquerySchema\",\"fields\":[{\"name\":\"id_marca\",\"type\":[\"long\",\"null\"]},{\"name\":\"marca\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_linha\",\"type\":[\"long\",\"null\"]},{\"name\":\"linha\",\"type\":[\"string\",\"null\"]},{\"name\":\"data_venda\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"qtd_venda\",\"type\":[\"long\",\"null\"]},{\"name\":\"dia\",\"type\":[\"string\",\"null\"]},{\"name\":\"mes\",\"type\":[\"string\",\"null\"]},{\"name\":\"ano\",\"type\":[\"string\",\"null\"]},{\"name\":\"ano_mes\",\"type\":[\"string\",\"null\"]},{\"name\":\"mes_nome\",\"type\":[\"string\",\"null\"]}]}",
+                        "enableQueryingViews": "false",
+                        "serviceFilePath": "/chaves/datafusion-284914-3bf5712a0b57.json",
+                        "project": "datafusion-284914",
+                        "datasetProject": "datafusion-284914",
+                        "dataset": "rz",
+                        "table": "vendas",
+                        "referenceName": "rz.vendas"
+                    }
+                },
+                "outputSchema": "{\"type\":\"record\",\"name\":\"bigquerySchema\",\"fields\":[{\"name\":\"id_marca\",\"type\":[\"long\",\"null\"]},{\"name\":\"marca\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_linha\",\"type\":[\"long\",\"null\"]},{\"name\":\"linha\",\"type\":[\"string\",\"null\"]},{\"name\":\"data_venda\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"qtd_venda\",\"type\":[\"long\",\"null\"]},{\"name\":\"dia\",\"type\":[\"string\",\"null\"]},{\"name\":\"mes\",\"type\":[\"string\",\"null\"]},{\"name\":\"ano\",\"type\":[\"string\",\"null\"]},{\"name\":\"ano_mes\",\"type\":[\"string\",\"null\"]},{\"name\":\"mes_nome\",\"type\":[\"string\",\"null\"]}]}",
+                "id": "BigQueryTable"
+            },
+            {
+                "name": "Wrangler",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "Wrangler",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.2.3",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "workspaceId": "1fa868e1-98b9-4319-a2cc-d3fa4e76520c",
+                        "schema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"id_marca\",\"type\":[\"long\",\"null\"]},{\"name\":\"marca\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_linha\",\"type\":[\"long\",\"null\"]},{\"name\":\"linha\",\"type\":[\"string\",\"null\"]},{\"name\":\"data_venda\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"qtd_venda\",\"type\":[\"long\",\"null\"]},{\"name\":\"dia\",\"type\":[\"string\",\"null\"]},{\"name\":\"mes\",\"type\":[\"string\",\"null\"]},{\"name\":\"ano\",\"type\":[\"string\",\"null\"]},{\"name\":\"ano_mes\",\"type\":[\"string\",\"null\"]},{\"name\":\"mes_nome\",\"type\":[\"string\",\"null\"]}]}",
+                        "field": "*",
+                        "precondition": "false",
+                        "threshold": "1"
+                    }
+                },
+                "outputSchema": "{\"name\":\"avroSchema\",\"type\":\"record\",\"fields\":[{\"name\":\"id_marca\",\"type\":[\"long\",\"null\"]},{\"name\":\"marca\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_linha\",\"type\":[\"long\",\"null\"]},{\"name\":\"linha\",\"type\":[\"string\",\"null\"]},{\"name\":\"data_venda\",\"type\":[{\"type\":\"long\",\"logicalType\":\"timestamp-micros\"},\"null\"]},{\"name\":\"qtd_venda\",\"type\":[\"long\",\"null\"]},{\"name\":\"dia\",\"type\":[\"string\",\"null\"]},{\"name\":\"mes\",\"type\":[\"string\",\"null\"]},{\"name\":\"ano\",\"type\":[\"string\",\"null\"]},{\"name\":\"ano_mes\",\"type\":[\"string\",\"null\"]},{\"name\":\"mes_nome\",\"type\":[\"string\",\"null\"]}]}",
+                "id": "Wrangler"
+            },
+            {
+                "name": "Consolidado_Ano_Mes3",
+                "plugin": {
+                    "name": "GroupByAggregate",
+                    "type": "batchaggregator",
+                    "label": "Consolidado_Ano_Mes3",
+                    "artifact": {
+                        "name": "core-plugins",
+                        "version": "2.4.3",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "groupByFields": "ano_mes",
+                        "aggregates": "quantidade:Sum(qtd_venda)"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema.typeagg\",\"fields\":[{\"name\":\"ano_mes\",\"type\":[\"string\",\"null\"]},{\"name\":\"quantidade\",\"type\":[\"int\",\"null\"]}]}"
+                    }
+                ],
+                "id": "Consolidado_Ano_Mes3"
+            },
+            {
+                "name": "CZ_Consolidado_Ano_Mes81",
+                "plugin": {
+                    "name": "BigQueryTable",
+                    "type": "batchsink",
+                    "label": "CZ_Consolidado_Ano_Mes81",
+                    "artifact": {
+                        "name": "google-cloud",
+                        "version": "0.15.3",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "project": "datafusion-284914",
+                        "serviceFilePath": "/chaves/datafusion-284914-3bf5712a0b57.json",
+                        "operation": "insert",
+                        "truncateTable": "true",
+                        "allowSchemaRelaxation": "true",
+                        "location": "US",
+                        "createPartitionedTable": "false",
+                        "partitioningType": "TIME",
+                        "partitionFilterRequired": "false",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema.typeagg\",\"fields\":[{\"name\":\"ano_mes\",\"type\":[\"string\",\"null\"]},{\"name\":\"quantidade\",\"type\":[\"int\",\"null\"]}]}",
+                        "referenceName": "Consolidado_Ano_Mes",
+                        "dataset": "cz",
+                        "table": "consolidado_ano_mes"
+                    }
+                },
+                "outputSchema": "{\"type\":\"record\",\"name\":\"avroSchema.typeagg\",\"fields\":[{\"name\":\"ano_mes\",\"type\":[\"string\",\"null\"]},{\"name\":\"quantidade\",\"type\":[\"int\",\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "Consolidado_Ano_Mes3",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema.typeagg\",\"fields\":[{\"name\":\"ano_mes\",\"type\":[\"string\",\"null\"]},{\"name\":\"quantidade\",\"type\":[\"int\",\"null\"]}]}"
+                    }
+                ],
+                "id": "CZ_Consolidado_Ano_Mes81"
+            },
+            {
+                "name": "Agregando_Marca_Linha23",
+                "plugin": {
+                    "name": "GroupByAggregate",
+                    "type": "batchaggregator",
+                    "label": "Agregando_Marca_Linha23",
+                    "artifact": {
+                        "name": "core-plugins",
+                        "version": "2.4.3",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "groupByFields": "id_marca,marca,id_linha,linha",
+                        "aggregates": "quantidade:Sum(qtd_venda)"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema.typeagg\",\"fields\":[{\"name\":\"id_marca\",\"type\":[\"int\",\"null\"]},{\"name\":\"marca\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_linha\",\"type\":[\"int\",\"null\"]},{\"name\":\"linha\",\"type\":[\"string\",\"null\"]},{\"name\":\"quantidade\",\"type\":[\"int\",\"null\"]}]}"
+                    }
+                ],
+                "id": "Agregando_Marca_Linha23"
+            },
+            {
+                "name": "CZ_Consolidado_Marca_Linha91",
+                "plugin": {
+                    "name": "BigQueryTable",
+                    "type": "batchsink",
+                    "label": "CZ_Consolidado_Marca_Linha91",
+                    "artifact": {
+                        "name": "google-cloud",
+                        "version": "0.15.3",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "project": "datafusion-284914",
+                        "serviceFilePath": "/chaves/datafusion-284914-3bf5712a0b57.json",
+                        "operation": "insert",
+                        "truncateTable": "true",
+                        "allowSchemaRelaxation": "true",
+                        "location": "US",
+                        "createPartitionedTable": "false",
+                        "partitioningType": "TIME",
+                        "partitionFilterRequired": "false",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema.typeagg\",\"fields\":[{\"name\":\"id_marca\",\"type\":[\"int\",\"null\"]},{\"name\":\"marca\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_linha\",\"type\":[\"int\",\"null\"]},{\"name\":\"linha\",\"type\":[\"string\",\"null\"]},{\"name\":\"quantidade\",\"type\":[\"int\",\"null\"]}]}",
+                        "referenceName": "Consolidado_Marca_Linha",
+                        "dataset": "cz",
+                        "table": "consolidado_marca_linha"
+                    }
+                },
+                "outputSchema": "{\"type\":\"record\",\"name\":\"avroSchema.typeagg\",\"fields\":[{\"name\":\"id_marca\",\"type\":[\"int\",\"null\"]},{\"name\":\"marca\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_linha\",\"type\":[\"int\",\"null\"]},{\"name\":\"linha\",\"type\":[\"string\",\"null\"]},{\"name\":\"quantidade\",\"type\":[\"int\",\"null\"]}]}",
+                "inputSchema": [
+                    {
+                        "name": "Agregando_Marca_Linha23",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema.typeagg\",\"fields\":[{\"name\":\"id_marca\",\"type\":[\"int\",\"null\"]},{\"name\":\"marca\",\"type\":[\"string\",\"null\"]},{\"name\":\"id_linha\",\"type\":[\"int\",\"null\"]},{\"name\":\"linha\",\"type\":[\"string\",\"null\"]},{\"name\":\"quantidade\",\"type\":[\"int\",\"null\"]}]}"
+                    }
+                ],
+                "id": "CZ_Consolidado_Marca_Linha91"
+            },
+            {
+                "name": "Agregando_Marca_Ano_mes41",
+                "plugin": {
+                    "name": "GroupByAggregate",
+                    "type": "batchaggregator",
+                    "label": "Agregando_Marca_Ano_mes41",
+                    "artifact": {
+                        "name": "core-plugins",
+                        "version": "2.4.3",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "groupByFields": "id_marca,marca,ano_mes",
+                        "aggregates": "quantidade:Sum(qtd_venda)"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema.typeagg\",\"fields\":[{\"name\":\"id_marca\",\"type\":[\"int\",\"null\"]},{\"name\":\"marca\",\"type\":[\"string\",\"null\"]},{\"name\":\"ano_mes\",\"type\":[\"string\",\"null\"]},{\"name\":\"quantidade\",\"type\":[\"int\",\"null\"]}]}"
+                    }
+                ],
+                "id": "Agregando_Marca_Ano_mes41"
+            },
+            {
+                "name": "CZ_Consolidado_Marca_Ano_Mes50",
+                "plugin": {
+                    "name": "BigQueryTable",
+                    "type": "batchsink",
+                    "label": "CZ_Consolidado_Marca_Ano_Mes50",
+                    "artifact": {
+                        "name": "google-cloud",
+                        "version": "0.15.3",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "project": "datafusion-284914",
+                        "serviceFilePath": "/chaves/datafusion-284914-3bf5712a0b57.json",
+                        "operation": "insert",
+                        "truncateTable": "true",
+                        "allowSchemaRelaxation": "true",
+                        "location": "US",
+                        "createPartitionedTable": "false",
+                        "partitioningType": "TIME",
+                        "partitionFilterRequired": "false",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema.typeagg\",\"fields\":[{\"name\":\"id_marca\",\"type\":[\"int\",\"null\"]},{\"name\":\"marca\",\"type\":[\"string\",\"null\"]},{\"name\":\"ano_mes\",\"type\":[\"string\",\"null\"]},{\"name\":\"quantidade\",\"type\":[\"int\",\"null\"]}]}",
+                        "referenceName": "Consolidado_Marca_Ano_Mes",
+                        "dataset": "cz",
+                        "table": "consolidado_marca_ano_mes"
+                    }
+                },
+                "outputSchema": "{\"type\":\"record\",\"name\":\"avroSchema.typeagg\",\"fields\":[{\"name\":\"id_marca\",\"type\":[\"int\",\"null\"]},{\"name\":\"marca\",\"type\":[\"string\",\"null\"]},{\"name\":\"ano_mes\",\"type\":[\"string\",\"null\"]},{\"name\":\"quantidade\",\"type\":[\"int\",\"null\"]}]}",
+                "id": "CZ_Consolidado_Marca_Ano_Mes50"
+            },
+            {
+                "name": "Agregando_Linha_Ano_Mes53",
+                "plugin": {
+                    "name": "GroupByAggregate",
+                    "type": "batchaggregator",
+                    "label": "Agregando_Linha_Ano_Mes53",
+                    "artifact": {
+                        "name": "core-plugins",
+                        "version": "2.4.3",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "groupByFields": "id_linha,linha,ano_mes",
+                        "aggregates": "quantidade:Sum(qtd_venda)"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema.typeagg\",\"fields\":[{\"name\":\"id_linha\",\"type\":[\"int\",\"null\"]},{\"name\":\"linha\",\"type\":[\"string\",\"null\"]},{\"name\":\"ano_mes\",\"type\":[\"string\",\"null\"]},{\"name\":\"quantidade\",\"type\":[\"int\",\"null\"]}]}"
+                    }
+                ],
+                "id": "Agregando_Linha_Ano_Mes53"
+            },
+            {
+                "name": "CZ_Consolidado_Linha_Ano_Mes47",
+                "plugin": {
+                    "name": "BigQueryTable",
+                    "type": "batchsink",
+                    "label": "CZ_Consolidado_Linha_Ano_Mes47",
+                    "artifact": {
+                        "name": "google-cloud",
+                        "version": "0.15.3",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "project": "datafusion-284914",
+                        "serviceFilePath": "/chaves/datafusion-284914-3bf5712a0b57.json",
+                        "operation": "insert",
+                        "truncateTable": "true",
+                        "allowSchemaRelaxation": "true",
+                        "location": "US",
+                        "createPartitionedTable": "false",
+                        "partitioningType": "TIME",
+                        "partitionFilterRequired": "false",
+                        "schema": "{\"type\":\"record\",\"name\":\"avroSchema.typeagg\",\"fields\":[{\"name\":\"id_linha\",\"type\":[\"int\",\"null\"]},{\"name\":\"linha\",\"type\":[\"string\",\"null\"]},{\"name\":\"ano_mes\",\"type\":[\"string\",\"null\"]},{\"name\":\"quantidade\",\"type\":[\"int\",\"null\"]}]}",
+                        "referenceName": "Consolidado_Linha_Ano_Mes",
+                        "dataset": "cz",
+                        "table": "consolidado_linha_ano_mes"
+                    }
+                },
+                "outputSchema": "{\"type\":\"record\",\"name\":\"avroSchema.typeagg\",\"fields\":[{\"name\":\"id_linha\",\"type\":[\"int\",\"null\"]},{\"name\":\"linha\",\"type\":[\"string\",\"null\"]},{\"name\":\"ano_mes\",\"type\":[\"string\",\"null\"]},{\"name\":\"quantidade\",\"type\":[\"int\",\"null\"]}]}",
+                "id": "CZ_Consolidado_Linha_Ano_Mes47"
+            }
+        ],
+        "schedule": "0 * * * *",
+        "engine": "spark",
+        "numOfRecordsPreview": 100,
+        "description": "Data Pipeline Application",
+        "maxConcurrentRuns": 1
+    }
+}
